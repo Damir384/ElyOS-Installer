@@ -2,10 +2,11 @@
 #define DIALOGS_HPP
 
 #include <string>
+#include <sstream>
 #include <ncurses.h>
 
 namespace dialogs {
-    
+    int dialog_text(WINDOW* win, std::string title, std::string content);
 }
 
 #endif
