@@ -1,6 +1,5 @@
 #include <ncurses.h>
 #include <iostream>
-#include <cstring>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -37,8 +36,10 @@ int main() {
     int width = COLS - 4;
     WINDOW* win = newwin(height, width, 1, 2);
     keypad(win, TRUE);
+    std::string title = "Test";
+    std::string content = "Test message for function \"dialog_test\"";
 
-    dialogs::dialog_text(win, "Hello", "hello. this is test text. for exit from programm press esc or enter.");
+    dialogs::dialog_text(win, title, content);
 
     endwin(); // завершение ncurses
 }
