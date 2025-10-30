@@ -2,7 +2,6 @@
 #define DIALOGS_HPP
 
 #include <string>
-#include <sstream>
 #include <ncurses.h>
 
 namespace dialogs {
