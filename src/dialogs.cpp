@@ -58,17 +58,24 @@ namespace dialogs {
 
         // Цикл обновления пада и логика управления выводом
         while (true) {
-            prefresh(pad, scroll, 0, wh+1, ww+1, wh+h-1, ww+w);
-            int key = wgetch(win);
-            if (key == KEY_UP && scroll >= 1)
-                scroll--;
-            else if (key == KEY_DOWN && scroll <= max)
-                scroll++;
-            else if (key == KEY_HOME && scroll)
-                scroll = 0;
-            else if (key == 10 || key == 27){
-                delwin(pad);
-                return 0;
+            prefresh(pad, scroll, 0, wh+1, ww+1, wh+h-2, ww+w);
+            switch(wgetch(win)) {
+                case KEY_UP:
+                    if(scroll >= 1)
+                        scroll--;
+                    break;
+                case KEY_DOWN:
+                    if(scroll <= max)
+                        scroll++;
+                    break;
+                case KEY_HOME:
+                    if(scroll)
+                        scroll = 0;
+                    break;
+                case 10:
+                case 27:
+                    delwin(pad);
+                    return 0;
             }
         }
 
