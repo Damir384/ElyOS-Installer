@@ -39,3 +39,6 @@ clean:
 
 run: all
 	./$(TARGET)
+
+debug: all
+	./$(TARGET) --debug
