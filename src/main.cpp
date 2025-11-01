@@ -83,8 +83,9 @@ int main(int argc, char* argv[]) {
     keypad(win, TRUE);
     std::string title = "Test";
     std::string content = "Test message for function \"dialog_test\"";
+    std::string err = "";
 
-    dialogs::dialog_text(win, title, content);
+    dialogs::dialog_text(win, title, content, err);
 
     endwin(); // завершение ncurses
 }
