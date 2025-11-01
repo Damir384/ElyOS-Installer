@@ -20,39 +20,47 @@ namespace dialogs {
         // Создаём рамку в окне win
         box(win, 0, 0);
 
-        // Выводим заголовок title в окно win
-        mvwprintw(win, 0, 1, "%s", title.c_str());
-
         // Выводим изменения
         wrefresh(win);
 
-        // Расположение окна win
-        int h, w = 0;
-
         // Размер окна win
+        int h, w = 0;
+        
+        // Расположение окна win
         int wh, ww = 0;
 
         getmaxyx(win, h, w);
         getbegyx(win, wh, ww);
 
-        // Общая высота пада
-        int pad_h = 1;
+        int lines = 0;
+        int string = 0;
 
-        for (size_t i = 0; i < content.size(); i++){
-            if (content[i] == '\n')
-                pad_h++;
-        }
-
-        // Общее количество строк выводимых в паде
-        int text_lines = ((content.size() - pad_h) / (w - 2)) + pad_h;
+        if (!content.empty())
+            for (size_t i = 0; i < content.size(); i++) {
+                if (content[i] == '\n'){
+                    lines++;
+                    if (string > 0){
+                        lines += (string / (w-2));
+                    }
+                    if (i != (content.size() - 1))
+                        string = 0;
+                }else{
+                    string++;
+                }
+            }
+        if (string % (w-2))
+            lines++;
 
         // Ограничение прокрутки пада 
-        int max = (text_lines - h + 1);
+        int max = (lines - (h - 1));
+
+        // Выводим заголовок title в окно win
+        mvwprintw(win, 0, 1, "%d", lines);
 
         if (max < -1)
             max = -1;
 
-        WINDOW* pad = newpad(text_lines, w - 2);
+        WINDOW* pad = newpad(lines, w - 2);
 
         mvwprintw(pad, 0, 0, "%s", content.c_str());
 
@@ -64,7 +72,7 @@ namespace dialogs {
             prefresh(pad, scroll, 0, wh+1, ww+1, wh+h-2, ww+w);
             switch(wgetch(win)) {
                 case KEY_UP:
-                    if(scroll >= 1)
+                    if(scroll > 0)
                         scroll--;
                     break;
                 case KEY_DOWN:
