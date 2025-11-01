@@ -12,8 +12,11 @@ namespace dialogs {
      * 
      * @param content
      * принимает на вход строку типа string и выводит её как содержимое окна с возможностью прокрутки
+     * 
+     * @param error
+     * принимает на вход строку типа string и выводит её как содержимое окна с возможностью прокрутки
      */
-    int dialog_text(WINDOW* win, std::string title, std::string content){
+    int dialog_text(WINDOW* win, std::string & title, std::string & content, std::string & error){
         // Создаём рамку в окне win
         box(win, 0, 0);
 

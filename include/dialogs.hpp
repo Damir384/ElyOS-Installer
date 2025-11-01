@@ -5,7 +5,7 @@
 #include <ncurses.h>
 
 namespace dialogs {
-    int dialog_text(WINDOW* win, std::string title, std::string content);
+    int dialog_text(WINDOW* win, std::string & title, std::string & content, std::string & error);
 }
 
 #endif
