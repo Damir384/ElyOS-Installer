@@ -19,7 +19,10 @@ namespace dialogs {
     int dialog_text(WINDOW* win, std::string & title, std::string & content, std::string & error){
         // Создаём рамку в окне win
         box(win, 0, 0);
-
+        
+        // Выводим заголовок title в окно win
+        mvwprintw(win, 0, 1, "%s", title.c_str());
+        
         // Выводим изменения
         wrefresh(win);
 
@@ -54,8 +57,6 @@ namespace dialogs {
         // Ограничение прокрутки пада 
         int max = (lines - (h - 1));
 
-        // Выводим заголовок title в окно win
-        mvwprintw(win, 0, 1, "%d", lines);
 
         if (max < -1)
             max = -1;
