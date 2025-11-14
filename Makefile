@@ -1,25 +1,27 @@
-# Компилятор и флаги
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17 -Iinclude
 LDFLAGS = -lncurses
 
-# Папки
 SRC_DIR = src
 BUILD_DIR = build
 LIB_DIR = lib
 
-# Файлы
 LIB_NAME = libdialogs.a
 LIB = $(LIB_DIR)/$(LIB_NAME)
 TARGET = $(BUILD_DIR)/app
 
-# Исходники
-LIB_SRC = $(SRC_DIR)/dialogs.cpp
-APP_SRC = $(SRC_DIR)/main.cpp
+# Автоматически найдём все .cpp
+ALL_SRC = $(wildcard $(SRC_DIR)/*.cpp)
 
-# Объектники
-LIB_OBJ = $(BUILD_DIR)/dialogs.o
-APP_OBJ = $(BUILD_DIR)/main.o
+# dialogs.cpp → в библиотеку
+LIB_SRC = $(SRC_DIR)/dialogs.cpp
+
+# Остальные .cpp → приложение
+APP_SRC = $(filter-out $(LIB_SRC), $(ALL_SRC))
+
+# Соответствующие .o
+LIB_OBJ = $(LIB_SRC:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+APP_OBJ = $(APP_SRC:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 
 all: $(TARGET)
 
