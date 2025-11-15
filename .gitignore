@@ -1,0 +1,18 @@
+# build artifacts
+/build
+/lib
+*.o
+*.a
+*.out
+*.exe
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# logs
+*.log
+*.tmp
+
+# cache
+*.cache

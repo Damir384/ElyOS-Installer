@@ -4,40 +4,24 @@ LDFLAGS = -lncurses
 
 SRC_DIR = src
 BUILD_DIR = build
-LIB_DIR = lib
 
-LIB_NAME = libdialogs.a
-LIB = $(LIB_DIR)/$(LIB_NAME)
+# Все cpp рекурсивно
+SRCS = $(shell find $(SRC_DIR) -name "*.cpp")
+OBJS = $(SRCS:%.cpp=$(BUILD_DIR)/%.o)
+
 TARGET = $(BUILD_DIR)/app
-
-# Автоматически найдём все .cpp
-ALL_SRC = $(wildcard $(SRC_DIR)/*.cpp)
-
-# dialogs.cpp → в библиотеку
-LIB_SRC = $(SRC_DIR)/dialogs.cpp
-
-# Остальные .cpp → приложение
-APP_SRC = $(filter-out $(LIB_SRC), $(ALL_SRC))
-
-# Соответствующие .o
-LIB_OBJ = $(LIB_SRC:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
-APP_OBJ = $(APP_SRC:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 
 all: $(TARGET)
 
-$(LIB): $(LIB_OBJ)
-	mkdir -p $(LIB_DIR)
-	ar rcs $(LIB) $(LIB_OBJ)
+$(TARGET): $(OBJS)
+	$(CXX) $(OBJS) $(LDFLAGS) -o $(TARGET)
 
-$(TARGET): $(LIB) $(APP_OBJ)
-	$(CXX) $(APP_OBJ) -L$(LIB_DIR) -ldialogs $(LDFLAGS) -o $(TARGET)
-
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
-	mkdir -p $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.cpp
+	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(BUILD_DIR) $(LIB_DIR)
+	rm -rf $(BUILD_DIR)
 
 run: all
 	./$(TARGET)
