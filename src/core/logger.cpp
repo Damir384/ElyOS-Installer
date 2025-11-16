@@ -1,6 +1,7 @@
 #include "../../include/logger.hpp"
 #include <ctime>
 #include <iomanip>
+#include <filesystem>
 
 Logger& Logger::get() {
     static Logger instance;
@@ -8,7 +9,13 @@ Logger& Logger::get() {
 }
 
 Logger::Logger() {
-    file.open("/tmp/elyos_install.log", std::ios::app); // можно изменить путь
+    std::string path = "/tmp/elyos_install.log";
+
+    if (std::filesystem::exists(path)) {
+        std::filesystem::remove(path);
+    }
+
+    file.open(path, std::ios::app); // можно изменить путь
 }
 
 Logger::~Logger() {

@@ -4,13 +4,13 @@
 
 class AutoInstall {
 public:
-    int run() {
+    int run(WINDOW* win) {
         StepManager manager;
 
         manager.add(std::make_unique<StepTest>());
         manager.add(std::make_unique<StepTest>());
 
-        manager.run();
+        manager.run(win);
         return 0;
     }
 };

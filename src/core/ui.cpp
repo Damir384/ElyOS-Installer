@@ -2,12 +2,7 @@
 
 namespace ui {
 
-WINDOW* createMainWindow(int minH, int minW, std::string& err) {
-    if (LINES < minH || COLS < minW) {
-        err = "Minimum required size: " + std::to_string(minW) + "x" + std::to_string(minH);
-        return nullptr;
-    }
-
+WINDOW* createMainWindow(int minH, int minW) {
     int y = (LINES - minH) / 2;
     int x = (COLS - minW) / 2;
 

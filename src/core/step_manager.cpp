@@ -1,6 +1,7 @@
 #include "../../include/step.hpp"
 #include <vector>
 #include <memory>
+#include <ncurses.h>
 
 class StepManager {
 public:
@@ -8,11 +9,11 @@ public:
         steps.push_back(std::move(step));
     }
 
-    StepResult run() {
+    StepResult run(WINDOW* win) {
         int index = 0;
         
         while (index >= 0 && index < static_cast<int>(steps.size())) {
-            StepResult result = steps[index]->run();
+            StepResult result = steps[index]->run(win);
             
             switch (result) {
                 case StepResult::Next:

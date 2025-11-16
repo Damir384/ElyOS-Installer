@@ -1,4 +1,5 @@
 #pragma once
+#include <ncurses.h>
 
 enum class StepResult {
     Next,
@@ -9,5 +10,5 @@ enum class StepResult {
 class Step {
 public:
     virtual ~Step() = default;
-    virtual StepResult run() = 0;
+    virtual StepResult run(WINDOW* win) = 0;
 };
