@@ -2,6 +2,46 @@
 
 namespace dialogs {
 
+    std::vector<std::string> words_and_spaces(std::string str) {
+        std::stringstream ss(str);
+        std::string word;
+        std::vector<std::string> result;
+
+        if (ss >> word) {
+            result.push_back(word);
+        }
+
+        while (ss >> word) {
+            result.push_back(" ");
+            result.push_back(word);
+        }
+
+        return result;
+    }
+
+    void addstr_wordwrap(std::string & content, std::string & str, long unsigned int & width, int & lines) {
+        int x = 0;
+        if ((content.size()) <= width) {
+            str += content.c_str();
+            str += "\n";
+            lines++;
+        } else {
+            for(auto word : words_and_spaces(content)) {
+                if ((word.size() + x) <= width) {
+                    str += word.c_str();
+                    x += word.size();
+                    lines++;
+                } else {
+                    str += "\n";
+                    str += word.c_str();
+                    lines++;
+                    x = 0;
+                }
+            }
+            str += "\n";
+        }
+    }
+
     /**
      * Функция отображения текста внутри окна win
      * 
@@ -34,23 +74,35 @@ namespace dialogs {
         getbegyx(win, wh, ww);
 
         int lines = 0;
-        int string = 0;
+        std::string line;
+        std::string str;
+        long unsigned int www = w-2;
 
-        if (!content.empty())
-            for (size_t i = 0; i < content.size(); i++) {
-                if (content[i] == '\n'){
-                    lines++;
-                    if (string > 0){
-                        lines += (string / (w-2));
-                    }
-                    if (i != (content.size() - 1))
-                        string = 0;
-                }else{
-                    string++;
-                }
+        for (long unsigned int i = 0; i <= content.size(); i++) {
+            if (content[i] == '\n') {
+                addstr_wordwrap(line, str, www, lines);
+                line = "";
+            } else {
+                line += content[i];
             }
-        if (string % (w-2))
-            lines++;
+        }
+
+        // Изменить алгоритм вывода
+        // if (!content.empty())
+        //     for (size_t i = 0; i < content.size(); i++) {
+        //         if (content[i] == '\n'){
+        //             lines++;
+        //             if (string > 0){
+        //                 lines += (string / (w-2));
+        //             }
+        //             if (i != (content.size() - 1))
+        //                 string = 0;
+        //         }else{
+        //             string++;
+        //         }
+        //     }
+        // if (string % (w-2))
+        //     lines++;
 
         // Ограничение прокрутки пада 
         int max = (lines - (h - 1));
@@ -61,7 +113,9 @@ namespace dialogs {
 
         WINDOW* pad = newpad(lines, w - 2);
 
-        mvwprintw(pad, 0, 0, "%s", content.c_str());
+        mvwaddstr(pad, 0, 0, str.c_str());
+
+
 
         // Скрол пада
         int scroll = 0;
@@ -85,11 +139,13 @@ namespace dialogs {
                 case 10:
                 case 27:
                     delwin(pad);
+                    werase(win);
                     return 0;
             }
         }
 
         delwin(pad);
+        werase(win);
         return 0;
     };
 
@@ -170,8 +226,10 @@ namespace dialogs {
                 case '\n': // Enter
                 case KEY_ENTER:
                     choice = highlight;
+                    werase(win);
                     return 0;
                 case 27: // ESC → выход без выбора
+                    werase(win);
                     return 1;
             }
         }
