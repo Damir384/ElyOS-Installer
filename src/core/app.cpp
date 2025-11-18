@@ -34,8 +34,8 @@ int App::mainMenu() {
 }
 
 void App::mainInfo() {
-    std::string description = "Welcome to ElyOS installer.\nFor continue press Enter";
-    dialogs::dialog_text(mainWin, "Welcome", description);
+    std::string description = "Welcome to ElyOS installer alpha 0.1.0. This installer allows you to choose either an automatic or manual partitioning scheme.\n\n1. Auto (recommended) - Automatically partitions the disk and installs ElyOS.\n2. Manual - Allows you to manually partition the disk.\n3. ISO Build - Create a pre-configured ISO installer";
+    dialogs::dialog_text(mainWin, "Title", description);
 }
 
 void App::getMinResolution(int & minH, int & minW) {
