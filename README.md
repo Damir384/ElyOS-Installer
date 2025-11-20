@@ -21,3 +21,7 @@ make run
 ```bash
 make debug
 ```
+
+---
+
+This project uses code from jtc (MIT License). See `licenses/jtc.MIT`.
