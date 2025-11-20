@@ -1,4 +1,4 @@
-#include "../../include/logger.hpp"
+#include "logger.hpp"
 #include <ctime>
 #include <iomanip>
 #include <filesystem>

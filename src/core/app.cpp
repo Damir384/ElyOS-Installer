@@ -3,8 +3,8 @@
 #include <ncurses.h>
 #include <vector>
 #include <string>
-#include "../modes/auto_install.cpp"
-#include "../modes/manual_install.cpp"
+#include "modes/auto_install.hpp"
+#include "modes/manual_install.hpp"
 #include "logger.hpp"
 #include "ui.hpp"
 #include <iostream>

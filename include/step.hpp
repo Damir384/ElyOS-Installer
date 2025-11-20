@@ -1,5 +1,6 @@
 #pragma once
 #include <ncurses.h>
+#include "utils.hpp"
 
 enum class StepResult {
     Next,
