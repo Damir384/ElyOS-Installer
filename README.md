@@ -24,4 +24,4 @@ make debug
 
 ---
 
-This project uses code from jtc (MIT License). See `licenses/jtc.MIT`.
+This project uses code from nlohmann/json (MIT License). See `licenses/NLOHMANN.MIT`.
