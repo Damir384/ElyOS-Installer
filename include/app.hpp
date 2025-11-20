@@ -1,6 +1,14 @@
 #pragma once
 #include <string>
 #include <ncurses.h>
+#include "dialogs.hpp"
+#include <vector>
+#include <string>
+#include "modes/auto_install.hpp"
+#include "modes/manual_install.hpp"
+#include "logger.hpp"
+#include "ui.hpp"
+#include <iostream>
 
 class App {
 public:

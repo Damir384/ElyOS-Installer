@@ -1,13 +1,4 @@
 #include "app.hpp"
-#include "dialogs.hpp"
-#include <ncurses.h>
-#include <vector>
-#include <string>
-#include "modes/auto_install.hpp"
-#include "modes/manual_install.hpp"
-#include "logger.hpp"
-#include "ui.hpp"
-#include <iostream>
 
 App::App(int argc, char** argv) : argc(argc), argv(argv), debug(false) {}
 
