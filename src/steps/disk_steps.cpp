@@ -7,7 +7,15 @@ StepResult ShowPartitionInfo::run(WINDOW* win) {
 }
 
 StepResult ShowDisks::run(WINDOW* win) {
-    std::string description = exec("lsblk -Jndo NAME,TYPE");
-    dialogs::dialog_text(win, "select disk", description);
+    nlohmann::json result = nlohmann::json::parse(exec("lsblk -Jndo NAME,TYPE"));
+    std::vector<std::string> items;
+
+    for (const auto& dev : result["blockdevices"]) {
+        if (dev.contains("name"))
+            items.push_back(dev["name"]);
+    }
+
+    int choice = 0;
+    dialogs::dialog_menu(win, "select disk", items, choice);
     return StepResult::Next;
 }
