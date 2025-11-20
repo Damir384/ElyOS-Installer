@@ -87,23 +87,6 @@ namespace dialogs {
             }
         }
 
-        // Изменить алгоритм вывода
-        // if (!content.empty())
-        //     for (size_t i = 0; i < content.size(); i++) {
-        //         if (content[i] == '\n'){
-        //             lines++;
-        //             if (string > 0){
-        //                 lines += (string / (w-2));
-        //             }
-        //             if (i != (content.size() - 1))
-        //                 string = 0;
-        //         }else{
-        //             string++;
-        //         }
-        //     }
-        // if (string % (w-2))
-        //     lines++;
-
         // Ограничение прокрутки пада 
         int max = (lines - (h - 1));
 
@@ -148,28 +131,6 @@ namespace dialogs {
         werase(win);
         return 0;
     };
-
-// int dialog_menu(WINDOW* win, const std::string& title, const std::vector<std::string>& items, int& choice) {
-//     box(win, 0, 0);
-//     mvwprintw(win, 0, 2, "%s", title.c_str());
-
-//     int index = 0;
-//     while (true) {
-//         for (size_t i = 0; i < items.size(); i++) {
-//             if ((int)i == index)
-//                 wattron(win, A_REVERSE);
-//             mvwprintw(win, 2 + i, 2, "%s", items[i].c_str());
-//             wattroff(win, A_REVERSE);
-//         }
-//         wrefresh(win);
-
-//         switch(wgetch(win)) {
-//             case KEY_UP:   index = (index == 0) ? items.size() - 1 : index - 1; break;
-//             case KEY_DOWN: index = (index + 1) % items.size(); break;
-//             case 10: choice = index; return 0;
-//         }
-//     }
-// }
 
     int dialog_menu(WINDOW* win, const std::string& title, const std::vector<std::string>& items, int& choice) 
     {
@@ -233,6 +194,8 @@ namespace dialogs {
                     return 1;
             }
         }
+        werase(win);
+        return 0;
     }
 
 }
