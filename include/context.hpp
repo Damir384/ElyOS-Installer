@@ -4,11 +4,19 @@
 
 class InstallerContext {
 public:
+    // Singleton access
+    static InstallerContext& get() {
+        static InstallerContext instance;
+        return instance;
+    }
+
+    // Config data
     std::string selectedDisk;
     std::string partitionScheme;
     std::string graphics;
     std::string audio;
     std::vector<std::string> extraPackages;
-    
-    // Можешь добавить методы сериализации в файл позже
+
+private:
+    InstallerContext() = default;
 };
