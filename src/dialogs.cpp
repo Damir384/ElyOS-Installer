@@ -79,7 +79,7 @@ namespace dialogs {
         long unsigned int www = w-2;
 
         for (long unsigned int i = 0; i <= content.size(); i++) {
-            if (content[i] == '\n') {
+            if (content[i] == '\n' || i == content.size()){
                 addstr_wordwrap(line, str, www, lines);
                 line = "";
             } else {
@@ -167,6 +167,79 @@ namespace dialogs {
                 } else {
                     mvwprintw(win, y, x, "%s", items[i].c_str());
                 }
+            }
+
+            wrefresh(win);
+
+            int c = wgetch(win);
+
+            switch (c) {
+                case KEY_UP:
+                    highlight--;
+                    if (highlight < 0) highlight = items.size() - 1;
+                    break;
+
+                case KEY_DOWN:
+                    highlight++;
+                    if (highlight >= (int)items.size()) highlight = 0;
+                    break;
+
+                case '\n': // Enter
+                case KEY_ENTER:
+                    choice = highlight;
+                    werase(win);
+                    return 0;
+                case 27: // ESC → выход без выбора
+                    werase(win);
+                    return 1;
+            }
+        }
+        werase(win);
+        return 0;
+    }
+
+    int dialog_menu(WINDOW* win, const std::string& title, const std::map<std::string, std::string>& items, int& choice)
+    {
+        // Создаём рамку в окне win
+        box(win, 0, 0);
+        
+        // Выводим заголовок title в окно win
+        mvwprintw(win, 0, 1, "%s", title.c_str());
+        
+        // Выводим изменения
+        wrefresh(win);
+
+        int h, w;
+        getmaxyx(win, h, w);
+
+        int y, x;
+
+        // текущий выбранный пункт
+        int highlight = 0;
+
+        while (true) {
+            int i = 0;
+
+            // Вывод пунктов меню
+            for (const auto& [disk, name] : items) {
+                y = i + 1;                // начинаем с 1 (с учётом рамки)
+                x = 2;                    // немного отступаем от рамки
+
+                // Если пункт выходит за рамку — прекращаем (окно слишком маленькое)
+                if (y >= h - 2) break;
+
+                if (i == highlight) {
+                    wattron(win, A_REVERSE);
+                    mvwprintw(win, y, x, "%s", disk.c_str());
+                    x+=disk.size() + 1;
+                    mvwprintw(win, y, x, "%s", name.c_str());
+                    wattroff(win, A_REVERSE);
+                } else {
+                    mvwprintw(win, y, x, "%s", disk.c_str());
+                    x+=disk.size() + 1;
+                    mvwprintw(win, y, x, "%s", name.c_str());
+                }
+                i++;
             }
 
             wrefresh(win);
