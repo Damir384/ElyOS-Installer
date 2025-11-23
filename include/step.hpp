@@ -5,11 +5,13 @@
 enum class StepResult {
     Next,
     Prev,
-    Exit
+    Exit,
+    Skip
 };
 
 class Step {
 public:
     virtual ~Step() = default;
     virtual StepResult run(WINDOW* win) = 0;
+    virtual std::string name() = 0;
 };
