@@ -75,6 +75,7 @@ int App::run() {
     mainInfo();
     int mode = mainMenu();
     if (mode == 0) {
+        Logger::get().log(LogLevel::INFO, "Auto install started");
         AutoInstall AutoInstall;
         AutoInstall.run(getMainWindow());
     }
