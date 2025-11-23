@@ -7,15 +7,43 @@ StepResult ShowPartitionInfo::run(WINDOW* win) {
 }
 
 StepResult ShowDisks::run(WINDOW* win) {
-    nlohmann::json result = nlohmann::json::parse(exec("lsblk -Jndo NAME,TYPE"));
-    std::vector<std::string> items;
+    nlohmann::json result = nlohmann::json::parse(exec("lsblk -Jndo NAME,TYPE,MODEL"));
+    std::vector<std::string> disks;
+    std::map<std::string, std::string> list;
+    std::string disk;
+    std::string cmd;
 
     for (const auto& dev : result["blockdevices"]) {
-        if (dev.contains("name"))
-            items.push_back(dev["name"]);
+        if (!dev.contains("name") || !dev.contains("type"))
+            continue;
+        if (dev["type"] != "disk")
+            continue;
+
+        std::string disk = "/dev/";
+        disk.append(dev["name"]);
+
+        disks.push_back(disk);
+        list[disk] = dev["model"];
     }
 
     int choice = 0;
-    dialogs::dialog_menu(win, "select disk", items, choice);
+    dialogs::dialog_menu(win, "select disk", list, choice);
+    auto& ctx = InstallerContext::get();
+    ctx.selectedDisk = disks[choice];
+    Logger::get().log(LogLevel::INFO, "Selected disk: "+ctx.selectedDisk);
+    return StepResult::Next;
+}
+
+StepResult ShowPartitions::run(WINDOW* win) {
+    std::vector<std::string> list = {"BootRoot", "BootRootSwap"};
+    std::vector<std::string> partitions = {"Boot + Root partitions", "Boot + Root + Swap partitions"};
+    int choice = 0;
+
+    dialogs::dialog_menu(win, "Select partitioning scheme", partitions, choice);
+
+    auto& ctx = InstallerContext::get();
+    ctx.partitionScheme = list[choice];
+    Logger::get().log(LogLevel::INFO, "Selected partitioning scheme: "+ctx.partitionScheme);
+
     return StepResult::Next;
 }
