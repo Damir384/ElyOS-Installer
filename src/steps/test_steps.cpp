@@ -8,4 +8,7 @@ public:
         dialogs::dialog_text(win, "Test Step fdsg", "This is a step example.");
         return StepResult::Next;
     }
+    std::string name() override {
+        return "StepTest";
+    };
 };
