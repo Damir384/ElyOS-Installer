@@ -1,18 +1,24 @@
-# build artifacts
-/build
-/lib
-*.o
-*.a
-*.out
-*.exe
+# Директории сборки и генераторов
+build/
+bin/
+lib/
 
-# VSCode
-.vscode/
-*.code-workspace
+# Сторонние библиотеки (скачиваются через CMake FetchContent)
+libs/
 
-# logs
+# Логи и временные файлы установщика
 *.log
-*.tmp
+elyos-installer.log
 
-# cache
-*.cache
+# Локальные конфиги редакторов и IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Файлы компилятора и базы переходов
+compile_commands.json
+.cache/
