@@ -3,6 +3,8 @@
 #include "utils/logger.hpp"
 #include <string>
 
+class UIContext;
+
 namespace core {
 
 enum class ExitCode : int {
@@ -17,15 +19,19 @@ public:
     App();
     ~App() = default;
 
-    ExitCode init(int argc, char* argv[]);
+    // Единая точка входа: проверки хоста + запуск UI + исполнение FSM
+    static int bootstrap(int argc, char* argv[], UIContext* ui);
+
     void log(LogLevel level, const std::string& message);
-    int run();
 
     std::string log_file_path = "elyos-installer.log";
     bool debug = false;
 
 private:
+    ExitCode init(int argc, char* argv[]);
+    int run(UIContext* ui);
+
     bool m_is_initialized = false;
 };
 
-}
+} // namespace core

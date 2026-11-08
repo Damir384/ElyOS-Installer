@@ -47,86 +47,27 @@ ftxui::Element FTXUIContext::build_layout(const std::string& step_title, ftxui::
 }
 
 // -------------------------------------------------------------
-// 1. Экран приветствия (Welcome)
+// Экран приветствия
 // -------------------------------------------------------------
 StepResult FTXUIContext::show_welcome() {
     using namespace ftxui;
     StepResult outcome = StepResult::CANCEL;
 
-    auto btn_next = Button("Дальше >", [&] { outcome = StepResult::NEXT; m_screen->Exit(); });
-    auto btn_exit = Button("Выход [ESC]", [&] { outcome = StepResult::CANCEL; m_screen->Exit(); });
+    auto btn_next = Button("Proceed >", [&] { outcome = StepResult::NEXT; m_screen->Exit(); });
+    auto btn_exit = Button("Exit [ESC]", [&] { outcome = StepResult::CANCEL; m_screen->Exit(); });
     
-    auto buttons = Container::Horizontal({btn_exit, btn_next});
+    int default_btn = 1;
+    auto buttons = Container::Horizontal({btn_exit, btn_next}, &default_btn);
 
     auto content = vbox({
-        text("Добро пожаловать в установщик операционной системы ElyOS!") | center,
+        text("Welcome to the ElyOS installer!") | center,
         separatorEmpty(),
-        text("Автономия — это не изоляция, а независимость.") | italic | center,
-        separatorEmpty(),
-        text("Данный мастер подготовит накопители и развернет базовый образ Arch.") | center,
-        text("Используйте стрелки для навигации, Enter для выбора и ESC для отмены.") | dim | center
+        text("This wizard will prepare the storage devices and deploy a base Arch image.") | center,
+        text("Use the arrow keys to navigate, Enter to select, and ESC to cancel.") | dim | center
     }) | center;
 
     auto component = Renderer(buttons, [&] {
-        return build_layout("Приветствие", content, buttons);
-    });
-
-    // Перехват клавиши ESC
-    component |= CatchEvent([&](Event event) {
-        if (event == Event::Escape) {
-            outcome = StepResult::CANCEL;
-            m_screen->Exit();
-            return true;
-        }
-        return false;
-    });
-
-    m_screen->Loop(component);
-    return outcome;
-}
-
-// -------------------------------------------------------------
-// 2. Меню выбора диска (Disks Menu)
-// -------------------------------------------------------------
-StepResult FTXUIContext::show_disks_menu(const std::map<std::string, std::string>& disks_map, std::string& out_selected_path) {
-    using namespace ftxui;
-    StepResult outcome = StepResult::CANCEL;
-
-    std::vector<std::string> entries;
-    std::vector<std::string> paths;
-
-    for (const auto& [path, info] : disks_map) {
-        paths.push_back(path);
-        entries.push_back(path + " (" + info + ")");
-    }
-
-    if (entries.empty()) {
-        entries.push_back("Накопители не обнаружены!");
-    }
-
-    int selected = 0;
-    auto radiobox = Radiobox(&entries, &selected);
-
-    auto btn_back = Button("< Назад", [&] { outcome = StepResult::BACK; m_screen->Exit(); });
-    auto btn_next = Button("Дальше >", [&] { 
-        if (!paths.empty()) {
-            out_selected_path = paths[selected];
-            outcome = StepResult::NEXT; 
-            m_screen->Exit();
-        }
-    });
-
-    auto buttons = Container::Horizontal({btn_back, btn_next});
-    auto main_container = Container::Vertical({radiobox, buttons});
-
-    auto content = vbox({
-        text("Выберите целевой диск для разметки и установки:") | color(Color::White),
-        separatorEmpty(),
-        radiobox->Render() | frame | size(HEIGHT, LESS_THAN, 8)
-    });
-
-    auto component = Renderer(main_container, [&] {
-        return build_layout("Выбор накопителя", content, buttons);
+        return build_layout("Welcome", content, buttons);
     });
 
     component |= CatchEvent([&](Event event) {
@@ -143,30 +84,85 @@ StepResult FTXUIContext::show_disks_menu(const std::map<std::string, std::string
 }
 
 // -------------------------------------------------------------
-// 3. Универсальное меню (например, выбор режима)
+// Универсальное меню
 // -------------------------------------------------------------
 StepResult FTXUIContext::show_menu(const std::string& title, const std::vector<std::string>& options, int& out_selected_index) {
     using namespace ftxui;
     StepResult outcome = StepResult::CANCEL;
 
+    // 1. Индекс выбора
     int selected = out_selected_index;
+    if (selected < 0 || selected >= static_cast<int>(options.size())) {
+        selected = 0;
+    }
+
     auto radiobox = Radiobox(&options, &selected);
 
-    auto btn_back = Button("< Назад", [&] { outcome = StepResult::BACK; m_screen->Exit(); });
-    auto btn_next = Button("Дальше >", [&] { 
+    // 2. Кнопки управления
+    auto btn_back = Button("< Cancel", [&] { 
+        outcome = StepResult::BACK; 
+        m_screen->Exit(); 
+    });
+
+    auto btn_next = Button("Proceed >", [&] { 
         out_selected_index = selected;
         outcome = StepResult::NEXT; 
         m_screen->Exit(); 
     });
 
-    auto buttons = Container::Horizontal({btn_back, btn_next});
-    auto main_container = Container::Vertical({radiobox, buttons});
+    int default_btn = 1;
+    auto buttons = Container::Horizontal({btn_back, btn_next}, &default_btn);
 
-    auto content = vbox({
-        radiobox->Render() | frame
+    auto main_container = Container::Vertical({
+        radiobox,
+        buttons
     });
 
     auto component = Renderer(main_container, [&] {
+        auto content = vbox({
+            radiobox->Render() | frame | size(HEIGHT, LESS_THAN, 8)
+        });
+
+        return build_layout(title, content, buttons);
+    });
+
+    // 5. Перехват ESC
+    component |= CatchEvent([&](Event event) {
+        if (event == Event::Escape) {
+            outcome = StepResult::CANCEL;
+            m_screen->Exit();
+            return true;
+        }
+        return false;
+    });
+
+    m_screen->Loop(component);
+    return outcome;
+}
+
+StepResult FTXUIContext::show_info(const std::string &title, const std::string &source_text)
+{
+    using namespace ftxui;
+    StepResult outcome = StepResult::CANCEL;
+
+    auto btn_back = Button("< Cancel", [&] { 
+        outcome = StepResult::BACK; 
+        m_screen->Exit(); 
+    });
+
+    auto btn_next = Button("Proceed >", [&] { 
+        outcome = StepResult::NEXT; 
+        m_screen->Exit(); 
+    });
+
+    int default_btn = 1;
+    auto buttons = Container::Horizontal({btn_back, btn_next}, &default_btn);
+
+    auto content = vbox({
+        text(source_text) | center
+    }) | center;
+
+    auto component = Renderer(buttons, [&] {
         return build_layout(title, content, buttons);
     });
 
@@ -184,7 +180,7 @@ StepResult FTXUIContext::show_menu(const std::string& title, const std::vector<s
 }
 
 // -------------------------------------------------------------
-// 4. Поле ввода (Input Box)
+// Поле ввода
 // -------------------------------------------------------------
 StepResult FTXUIContext::show_input(const std::string& title, const std::string& placeholder, std::string& out_value) {
     using namespace ftxui;
@@ -193,14 +189,19 @@ StepResult FTXUIContext::show_input(const std::string& title, const std::string&
     std::string buffer = out_value;
     auto input_comp = Input(&buffer, placeholder);
 
-    auto btn_back = Button("< Назад", [&] { outcome = StepResult::BACK; m_screen->Exit(); });
-    auto btn_next = Button("Дальше >", [&] { 
+    auto btn_back = Button("< Cancel", [&] { 
+        outcome = StepResult::BACK; 
+        m_screen->Exit(); 
+    });
+
+    auto btn_next = Button("Proceed >", [&] { 
         out_value = buffer;
         outcome = StepResult::NEXT; 
         m_screen->Exit(); 
     });
 
-    auto buttons = Container::Horizontal({btn_back, btn_next});
+    int default_btn = 1;
+    auto buttons = Container::Horizontal({btn_back, btn_next}, &default_btn);
     auto main_container = Container::Vertical({input_comp, buttons});
 
     auto content = vbox({
@@ -227,14 +228,14 @@ StepResult FTXUIContext::show_input(const std::string& title, const std::string&
 }
 
 // -------------------------------------------------------------
-// 5. Диалог подтверждения (Confirmation)
+// Диалог подтверждения
 // -------------------------------------------------------------
 StepResult FTXUIContext::show_confirmation(const std::string& prompt) {
     using namespace ftxui;
     StepResult outcome = StepResult::BACK;
 
-    auto btn_no = Button("Нет (< Назад)", [&] { outcome = StepResult::BACK; m_screen->Exit(); });
-    auto btn_yes = Button("Да (Дальше >)", [&] { outcome = StepResult::NEXT; m_screen->Exit(); });
+    auto btn_no = Button("Нет (< Cancel)", [&] { outcome = StepResult::BACK; m_screen->Exit(); });
+    auto btn_yes = Button("Да (Proceed >)", [&] { outcome = StepResult::NEXT; m_screen->Exit(); });
 
     auto buttons = Container::Horizontal({btn_no, btn_yes});
 

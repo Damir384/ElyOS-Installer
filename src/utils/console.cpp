@@ -8,12 +8,14 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <array>
+#include "core/install_context.hpp"
+#include <getopt.h>
 
 extern char** environ;
 
 namespace utils {
 
-ProcessResult ProcessRunner::execute(const std::vector<std::string>& env,
+ProcessResult ProcessRunner::execute(const std::unordered_map<std::string, std::string>& env,
                                      const std::string& command, 
                                      const std::vector<std::string>& args, 
                                      bool capture_output) 
@@ -33,31 +35,48 @@ ProcessResult ProcessRunner::execute(const std::vector<std::string>& env,
 
         std::vector<char*> argv;
         argv.push_back(const_cast<char*>(command.c_str()));
-        for (auto& s : args) {
-            argv.push_back(const_cast<char*>(s.c_str()));
+        for (const auto& arg : args) {
+            argv.push_back(const_cast<char*>(arg.c_str()));
         }
         argv.push_back(nullptr);
 
-        std::vector<char*> envp;
-        for (char** env_it = environ; *env_it != nullptr; ++env_it) {
-            std::string_view entry(*env_it);
-            if (entry.rfind("LANG=", 0) == 0 || entry.rfind("LC_", 0) == 0) {
-                continue;
+        std::unordered_map<std::string, std::string> env_map;
+        for (char** current_env = environ; *current_env != nullptr; ++current_env) {
+            std::string_view entry(*current_env);
+            size_t eq_pos = entry.find('=');
+            if (eq_pos != std::string_view::npos) {
+                std::string key(entry.substr(0, eq_pos));
+                std::string val(entry.substr(eq_pos + 1));
+                env_map[key] = val;
             }
-            envp.push_back(*env_it);
         }
 
-        static char lang_c[] = "LANG=C";
-        static char lc_all_c[] = "LC_ALL=C";
-        envp.push_back(lang_c);
-        envp.push_back(lc_all_c);
+        env_map["LANG"] = "C";
+        env_map["LC_ALL"] = "C";
 
-        for (const auto& s : env) {
-            envp.push_back(const_cast<char*>(s.c_str()));
+        for (const auto& [key, val] : env) {
+            env_map[key] = val;
         }
 
-        envp.push_back(nullptr);
+        std::vector<std::string> env_strings;
+        env_strings.reserve(env_map.size());
 
+        for (const auto& [key, val] : env_map) {
+            env_strings.push_back(key + "=" + val);
+        }
+
+        // Д. Формируем Си-массив указателей char*
+        std::vector<char*> envp;
+        envp.reserve(env_strings.size() + 1);
+
+        for (auto& s : env_strings) {
+            envp.push_back(s.data()); // Гарантированно живет в пределах env_strings
+        }
+        envp.push_back(nullptr); // Терминатор массива
+
+        // -------------------------------------------------------------
+        // 3. Вызов функции ядра
+        // -------------------------------------------------------------
         execvpe(command.c_str(), argv.data(), envp.data());
         _exit(127);
     }
@@ -105,4 +124,31 @@ void print_console_error(std::string_view message, bool log_to_file) {
     }
 }
 
+int parse_cli_args(int argc, char* argv[], InstallContext& ctx) {
+    static struct option long_options[] = {
+        {"debug", no_argument, nullptr, 'd'},
+        {"help",  no_argument, nullptr, 'h'},
+        {nullptr, 0,           nullptr, 0}
+    };
+
+    optind = 1;
+    int opt;
+    int option_index = 0;
+
+    while ((opt = getopt_long(argc, argv, "dh", long_options, &option_index)) != -1) {
+        switch (opt) {
+            case 'd':
+                ctx.debug_mode = true;
+                break;
+            case 'h':
+                ctx.show_help = true;
+                return 1;
+            default:
+                return -1;
+        }
+    }
+
+    return 0;
 }
+
+} // namespace utils

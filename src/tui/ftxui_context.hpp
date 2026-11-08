@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui_interface.hpp"
+#include "ui/ui_interface.hpp"
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <memory>
@@ -15,8 +15,8 @@ public:
     void set_mode_name(const std::string& mode_name) override;
 
     StepResult show_welcome() override;
-    StepResult show_disks_menu(const std::map<std::string, std::string>& disks_map, std::string& out_selected_path) override;
     StepResult show_menu(const std::string& title, const std::vector<std::string>& options, int& out_selected_index) override;
+    StepResult show_info(const std::string& title, const std::string& text) override;
     StepResult show_input(const std::string& title, const std::string& placeholder, std::string& out_value) override;
     StepResult show_confirmation(const std::string& prompt) override;
 

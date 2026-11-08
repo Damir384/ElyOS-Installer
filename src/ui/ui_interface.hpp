@@ -15,15 +15,15 @@ public:
     
     virtual StepResult show_welcome() = 0;
 
-    virtual StepResult show_disks_menu(
-        const std::map<std::string, std::string>& disks_map, 
-        std::string& out_selected_path
-    ) = 0;
-
     virtual StepResult show_menu(
         const std::string& title,
         const std::vector<std::string>& options,
         int& out_selected_index
+    ) = 0;
+
+    virtual StepResult show_info(
+        const std::string& title,
+        const std::string& text
     ) = 0;
 
     virtual StepResult show_input(

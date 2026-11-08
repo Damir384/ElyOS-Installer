@@ -5,7 +5,9 @@ namespace core::steps {
 
     std::vector<Step> get_initial_steps() {
         return {
-            {"Экран приветствия", welcome_step},
+            {"Welcome", welcome_step},
+            {"Test of text", test_text_step},
+            {"Disk selection", disk_select_step},
             // Пример: {"Новый шаг", template_step}
         };
     }
@@ -43,6 +45,19 @@ namespace core::steps {
         return ctx.ui->show_welcome();
     }
 
+    StepResult test_text_step(InstallContext& ctx) {
+        if (!ctx.ui) {
+            Logger::instance().log(LogLevel::ERROR, "UI Context is missing in step execution.");
+            return StepResult::FATAL_ERROR;
+        }
+
+        std::string title = "Test";
+        std::string text = "";
+        StepResult res = ctx.ui->show_info(title, text);
+
+        return res;
+    }
+
     StepResult disk_select_step(InstallContext& ctx) {
         if (!ctx.ui) {
             return StepResult::FATAL_ERROR;
@@ -50,11 +65,19 @@ namespace core::steps {
 
         auto disks = utils::get_disks();
 
-        std::string selected_disk_path;
-        StepResult res = ctx.ui->show_disks_menu(disks, selected_disk_path);
+        std::vector<std::string> values;
+        std::vector<std::string> keys;
+
+        for(const auto& [path, name] : disks) {
+            values.push_back(name+" ["+path+"]");
+            keys.push_back(path);
+        }
+
+        int choice;
+        StepResult res = ctx.ui->show_menu("disk selection", values, choice);
 
         if (res == StepResult::NEXT) {
-            ctx.target_disk = selected_disk_path;
+            ctx.target_disk = disks[keys[choice]];
             Logger::instance().log(LogLevel::INFO, "Target disk selected by user: " + ctx.target_disk);
         }
 

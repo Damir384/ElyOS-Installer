@@ -28,6 +28,10 @@ enum class StepResult {
 class UIContext;
 
 struct InstallContext {
+    // Системные флаги запуска
+    bool debug_mode = false;
+    bool show_help = false;
+
     std::string app_name = ELY_APP_NAME;
     std::string app_version = ELY_VERSION;
     std::string mode_name = "Undecided";
@@ -36,9 +40,7 @@ struct InstallContext {
     std::string target_disk;
     std::string boot_part;
     std::string root_part;
-    // std::string username;
-    // std::string hostname = "elyos-node";
-    
+
     bool is_ready_to_install = false;
     UIContext* ui = nullptr;
 };

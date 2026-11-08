@@ -24,7 +24,8 @@ void Logger::init(const std::string& logFilePath) {
 void Logger::log(LogLevel level, std::string_view message) {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    if (!m_initialized || !m_fileStream.is_open()) {
+    // Железный фильтр: отсекаем сообщения ниже порога m_min_level
+    if (static_cast<int>(level) < static_cast<int>(m_min_level) || !m_initialized || !m_fileStream.is_open()) {
         return;
     }
 

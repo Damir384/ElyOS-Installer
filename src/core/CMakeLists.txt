@@ -1,6 +1,5 @@
-add_library(core STATIC 
+add_library(elyos_core STATIC 
     core.cpp 
-    args.cpp
     env.cpp
     welcome.cpp
     state_machine.cpp
@@ -8,9 +7,11 @@ add_library(core STATIC
     steps/steps_normal.cpp
 )
 
-target_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
+target_include_directories(elyos_core PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+)
 
-target_link_libraries(core PUBLIC 
-    ui 
+target_link_libraries(elyos_core PUBLIC 
+    ui
     utils
 )

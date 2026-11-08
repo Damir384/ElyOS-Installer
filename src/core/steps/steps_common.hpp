@@ -20,6 +20,8 @@ namespace core::steps {
 
     StepResult welcome_step(InstallContext& ctx);
 
+    StepResult test_text_step(InstallContext& ctx);
+
     StepResult disk_select_step(InstallContext& ctx);
 
 } // namespace core::steps
