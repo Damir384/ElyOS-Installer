@@ -65,4 +65,4 @@ sudo ./build/bin/ElyOS_Installer --debug
 Исходный код проекта распространяется под лицензией **Mozilla Public License 2.0 (MPL-2.0)**.  
 Подробности см. в файле [LICENSE](LICENSE).
 
-Copyright (c) 2026 ARDamir384. All rights reserved.
+Copyright (c) 2026 ARDamir384. Licensed under the MPL-2.0.
