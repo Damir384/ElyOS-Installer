@@ -26,10 +26,10 @@ std::map<std::string, std::string> get_disks() {
     std::map<std::string, std::string> disks_map;
     
     auto res = utils::ProcessRunner::execute({}, "lsblk", {"-J", "-b", "-o", "NAME,PATH,SIZE,TYPE,FSTYPE,MODEL"});
-    Logger::instance().log(LogLevel::DEBUG, res.output);
     
     try {
         auto disks = nlohmann::json::parse(res.output);
+        std::string disks_to_log = "Found disks:";
         
         for (const auto& disk : disks["blockdevices"]) {
             std::string type = disk.value("type", "");
@@ -52,8 +52,10 @@ std::map<std::string, std::string> get_disks() {
             if (!path.empty()) {
                 uint64_t size_gb = size / (1024 * 1024 * 1024);
                 disks_map[path] = model + " (" + std::to_string(size_gb) + " GB)";
+                disks_to_log += "\n["+path+"] "+model+" ("+std::to_string(size_gb)+")";
             }
         }
+        Logger::instance().log(LogLevel::DEBUG, disks_to_log);
     } catch (const nlohmann::json::parse_error& e) {
         Logger::instance().log(LogLevel::ERROR, "Failed to parse lsblk JSON: " + std::string(e.what()));
     }
