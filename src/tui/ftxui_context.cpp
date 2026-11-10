@@ -60,10 +60,7 @@ StepResult FTXUIContext::show_welcome() {
     auto buttons = Container::Horizontal({btn_exit, btn_next}, &default_btn);
 
     auto content = vbox({
-        text("Welcome to the ElyOS installer!") | center,
-        separatorEmpty(),
-        text("This wizard will prepare the storage devices and deploy a base Arch image.") | center,
-        text("Use the arrow keys to navigate, Enter to select, and ESC to cancel.") | dim | center
+        paragraph("Welcome to the ElyOS installer!") | center,
     }) | center;
 
     auto component = Renderer(buttons, [&] {
@@ -159,7 +156,7 @@ StepResult FTXUIContext::show_info(const std::string &title, const std::string &
     auto buttons = Container::Horizontal({btn_back, btn_next}, &default_btn);
 
     auto content = vbox({
-        text(source_text) | center
+        paragraph(source_text) | center
     }) | center;
 
     auto component = Renderer(buttons, [&] {
