@@ -56,7 +56,7 @@ public:
      * @details Messages below this severity level are discarded before formatting.
      * @param [in] level The minimum LogLevel to record (DEBUG, INFO, WARNING, ERROR).
      */
-    void set_min_level(LogLevel level);
+    void set_min_level(LogLevel level){ m_min_level = level; };
 
     /**
      * @brief Writes a formatted message to the active log file.
