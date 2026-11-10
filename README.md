@@ -59,6 +59,11 @@ Logs are written to: ``elyos-installer.log``.
 
 ---
 
+## Development
+
+* **Architecture, Design & Implementation:** ARDamir384
+* **AI Co-Pilot & Pair Programming:** Developed in collaboration with Google Gemini (boilerplate generation, POSIX verification, architectural audits, and technical documentation).
+
 ## License
 
 This project is licensed under the **Mozilla Public License 2.0 (MPL-2.0)**.  
