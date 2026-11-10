@@ -40,5 +40,5 @@ private:
     std::ofstream m_fileStream;
     std::mutex m_mutex;
     bool m_initialized = false;
-    LogLevel m_min_level = LogLevel::INFO; // По умолчанию без флага -d дебаг не пишется
+    LogLevel m_min_level;
 };

@@ -9,6 +9,11 @@ struct InstallContext; // Forward declaration
 
 namespace utils {
 
+enum {
+    OPT_LOG_FILE = 1000,
+    OPT_PARTITION_PROFILES
+};
+
 struct ProcessResult {
     int exit_code = -1;
     std::string output;

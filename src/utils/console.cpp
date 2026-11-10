@@ -128,6 +128,8 @@ int parse_cli_args(int argc, char* argv[], InstallContext& ctx) {
     static struct option long_options[] = {
         {"debug", no_argument, nullptr, 'd'},
         {"help",  no_argument, nullptr, 'h'},
+        {"log-file",  required_argument, nullptr, OPT_LOG_FILE},
+        {"partition-profiles",  required_argument, nullptr, OPT_PARTITION_PROFILES},
         {nullptr, 0,           nullptr, 0}
     };
 
@@ -143,6 +145,12 @@ int parse_cli_args(int argc, char* argv[], InstallContext& ctx) {
             case 'h':
                 ctx.show_help = true;
                 return 1;
+            case OPT_LOG_FILE:
+                ctx.log_file_path = optarg;
+                break;
+            case OPT_PARTITION_PROFILES:
+                ctx.partition_profiles_path = optarg;
+                break;
             default:
                 return -1;
         }
