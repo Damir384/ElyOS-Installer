@@ -1,13 +1,14 @@
 #include "steps_common.hpp"
 #include "utils/logger.hpp"
+#include "core/install_context.hpp"
 
 namespace core::steps {
 
     std::vector<Step> get_initial_steps() {
         return {
             {"Welcome", welcome_step},
-            {"Test of text", test_text_step},
-            {"Disk selection", disk_select_step},
+            {"Information", information_step},
+            {"Selection mode", select_mode}
             // Пример: {"Новый шаг", template_step}
         };
     }
@@ -45,42 +46,42 @@ namespace core::steps {
         return ctx.ui->show_welcome();
     }
 
-    StepResult test_text_step(InstallContext& ctx) {
+    StepResult information_step(InstallContext& ctx) {
         if (!ctx.ui) {
             Logger::instance().log(LogLevel::ERROR, "UI Context is missing in step execution.");
             return StepResult::FATAL_ERROR;
         }
 
-        std::string title = "Test";
-        std::string text = "";
+        std::string title = "Information";
+        std::string text = R"(This installer is intended for installing the original Arch Linux image. Optionally, you can install the ElyOS family DE packages and themes. Navigation:
+arrow keys - navigate between buttons
+Space - select
+Enter - confirm
+ESC - exit
+mouse control is also supported
+)";
         StepResult res = ctx.ui->show_info(title, text);
 
         return res;
     }
 
-    StepResult disk_select_step(InstallContext& ctx) {
+    StepResult select_mode(InstallContext &ctx)
+    {
         if (!ctx.ui) {
+            Logger::instance().log(LogLevel::ERROR, "UI Context is missing in step execution.");
             return StepResult::FATAL_ERROR;
         }
 
-        auto disks = utils::get_disks();
+        std::vector<std::string> modes = {"Normal", "Advanced"};
+        int selected = 0;
 
-        std::vector<std::string> values;
-        std::vector<std::string> keys;
 
-        for(const auto& [path, name] : disks) {
-            values.push_back(name+" ["+path+"]");
-            keys.push_back(path);
+        auto res = ctx.ui->show_menu("Select install mode", modes, selected);
+        if (res == StepResult::NEXT){
+            ctx.mode = modes[selected];
+            Logger::instance().log(LogLevel::DEBUG, "Selected mode: "+ctx.mode);
+            return StepResult::RESET;
         }
-
-        int choice;
-        StepResult res = ctx.ui->show_menu("disk selection", values, choice);
-
-        if (res == StepResult::NEXT) {
-            ctx.target_disk = disks[keys[choice]];
-            Logger::instance().log(LogLevel::INFO, "Target disk selected by user: " + ctx.target_disk);
-        }
-
         return res;
     }
 

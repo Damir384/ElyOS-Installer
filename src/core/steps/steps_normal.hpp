@@ -2,5 +2,8 @@
 
 namespace core::steps {
     std::vector<Step> get_normal_installation_steps();
+
+    StepResult disk_select_step(InstallContext& ctx);
+    
     StepResult test_normal_step(InstallContext& ctx);
 }
