@@ -11,12 +11,6 @@
 #include <string>
 #include <vector>
 
-enum class InstallMode {
-    UNDECIDED,
-    NORMAL,
-    ADVANCED
-};
-
 enum class StepResult {
     NEXT,
     BACK,
@@ -49,9 +43,7 @@ struct InstallContext {
 
     std::string app_name = ELY_APP_NAME;
     std::string app_version = ELY_VERSION;
-    std::string mode_name = "Undecided";
-
-    InstallMode mode = InstallMode::UNDECIDED;
+    std::string mode = "Undecided";
 
     std::string target_disk;
     std::vector<PartitionPlan> partitions;

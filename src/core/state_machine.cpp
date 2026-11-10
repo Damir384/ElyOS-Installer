@@ -1,5 +1,6 @@
 #include "state_machine.hpp"
 #include "utils/logger.hpp"
+#include "core/steps/modes_registry.hpp"
 
 namespace core {
 
@@ -38,6 +39,11 @@ int StateMachine::run(InstallContext& ctx) {
             case StepResult::FATAL_ERROR:
                 Logger::instance().log(LogLevel::ERROR, "Fatal error encountered at step: " + step.title);
                 return -1;
+
+            case StepResult::RESET:
+                m_steps = core::steps::modes_registry[ctx.mode]();
+                m_current_index = 0;
+                break;
             
             default:
                 Logger::instance().log(LogLevel::ERROR, "The function returned an unknown status.");
