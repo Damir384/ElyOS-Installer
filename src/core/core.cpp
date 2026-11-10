@@ -31,10 +31,9 @@ int App::bootstrap(int argc, char* argv[], UIContext* ui) {
 }
 
 ExitCode App::init(int argc, char* argv[]) {
-    Logger::instance().init(log_file_path);
+    int parse_status = utils::parse_cli_args(argc, argv, this->m_ctx);
 
-    InstallContext temp_ctx;
-    int parse_status = utils::parse_cli_args(argc, argv, temp_ctx);
+    Logger::instance().init(m_ctx.log_file_path);
 
     if (parse_status == 1) {
         utils::print_console("ElyOS Installer v" ELY_VERSION "\nUsage: sudo ./ElyOS_Installer [-d|--debug] [-h|--help]");
@@ -43,28 +42,23 @@ ExitCode App::init(int argc, char* argv[]) {
         return ExitCode::ENVIRONMENT_INVALID;
     }
 
-    if (temp_ctx.debug_mode) {
-        this->debug = true;
+    if (this->m_ctx.debug_mode) {
         Logger::instance().set_min_level(LogLevel::DEBUG);
-        this->log(LogLevel::DEBUG, "Debug logging threshold engaged globally.");
+        Logger::instance().log(LogLevel::INFO, "Debug logging threshold engaged globally.");
     } else {
         Logger::instance().set_min_level(LogLevel::INFO);
+        Logger::instance().log(LogLevel::INFO, "Debug logging disable globally.");
     }
 
     core::print_welcome_message();
 
-    EnvCheckResult env = core::check_environment();
-    utils::print_console(std::string("Host firmware: ") + (env.is_efi ? "UEFI" : "Legacy BIOS (MBR)"));
-
-    if (!env.is_root) {
-        utils::print_console_error("Root privileges required. Run installer via sudo.");
-        return ExitCode::PERMISSION_DENIED;
-    }
-
-    if (!env.is_valid) {
-        utils::print_console_error("Hardware environment check failed: " + env.error_details);
+    std::string message;
+    if(core::check_environment(this->m_ctx, message) != 0){
+        utils::print_console_error(message);
         return ExitCode::ENVIRONMENT_INVALID;
-    }
+    };
+
+    utils::print_console(std::string("Host firmware: ") + (this->m_ctx.is_efi ? "UEFI" : "Legacy BIOS (MBR)"));
 
     utils::print_console("Hardware verified. Node environment valid.");
     this->m_is_initialized = true;
@@ -72,18 +66,13 @@ ExitCode App::init(int argc, char* argv[]) {
     return ExitCode::SUCCESS;
 }
 
-void App::log(LogLevel level, const std::string& message) {
-    Logger::instance().log(level, message);
-}
-
 int App::run(UIContext* ui) {
-    this->log(LogLevel::INFO, "Core engine execution loop engaged.");
-    InstallContext ctx;
-    ctx.ui = ui;
-    ctx.debug_mode = this->debug;
+    Logger::instance().log(LogLevel::INFO, "Core engine execution loop engaged.");
+    
+    this->m_ctx.ui = ui;
 
     core::StateMachine state_machine;
-    return state_machine.run(ctx);
+    return state_machine.run(this->m_ctx);
 }
 
 } // namespace core

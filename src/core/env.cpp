@@ -4,24 +4,20 @@
 
 namespace core {
 
-EnvCheckResult check_environment() {
-    EnvCheckResult result;
-
+int check_environment(InstallContext& ctx, std::string& message) {
     // 1. Проверка прав суперпользователя
-    result.is_root = (geteuid() == 0);
+    if (geteuid() != 0) {
+        message = "Root privileges required. Run installer via sudo.";
+        return -1;
+    };
 
     // 2. Проверка режима загрузки (UEFI vs BIOS)
-    result.is_efi = std::filesystem::exists("/sys/firmware/efi");
+    ctx.is_efi = false;
+    if(std::filesystem::exists("/sys/firmware/efi")) {
+        ctx.is_efi = true;
+    };
 
-    // Критический критерий для установщика ОС: запуск из-под root
-    if (!result.is_root) {
-        result.error_details = "Installer must be run with root privileges (sudo).";
-        result.is_valid = false;
-    } else {
-        result.is_valid = true;
-    }
-
-    return result;
+    return 0;
 }
 
 } // namespace core

@@ -1,17 +1,10 @@
 #pragma once
 
 #include <string>
+#include "install_context.hpp"
 
 namespace core {
 
-struct EnvCheckResult {
-    bool is_root = false;
-    bool is_efi = false;
-    bool is_valid = false;
-    std::string error_details;
-};
-
-// Проверяет UID процесса и наличие /sys/firmware/efi
-EnvCheckResult check_environment();
+int check_environment(InstallContext& ctx, std::string& message);
 
 } // namespace core
