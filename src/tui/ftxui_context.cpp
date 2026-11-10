@@ -263,3 +263,7 @@ StepResult FTXUIContext::show_confirmation(const std::string& prompt) {
     m_screen->Loop(component);
     return outcome;
 }
+
+void FTXUIContext::show_warning(const std::string &title, const std::string &message) {
+    
+}

@@ -33,4 +33,6 @@ public:
     ) = 0;
 
     virtual StepResult show_confirmation(const std::string& prompt) = 0;
+
+    virtual void show_warning(const std::string& title, const std::string& message) = 0;
 };

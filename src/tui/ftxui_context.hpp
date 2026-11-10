@@ -20,6 +20,8 @@ public:
     StepResult show_input(const std::string& title, const std::string& placeholder, std::string& out_value) override;
     StepResult show_confirmation(const std::string& prompt) override;
 
+    void show_warning(const std::string& title, const std::string& message) override;
+
 private:
     std::unique_ptr<ftxui::ScreenInteractive> m_screen;
     std::string m_app_name;
