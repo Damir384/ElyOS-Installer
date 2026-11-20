@@ -6,11 +6,13 @@ FTXUIContext::FTXUIContext()
     : m_app_name(ELY_APP_NAME), m_app_version(ELY_VERSION), m_mode_name("") {}
 
 void FTXUIContext::init_screen() {
-    m_screen = std::make_unique<ftxui::ScreenInteractive>(ftxui::ScreenInteractive::Fullscreen());
+    printf("\033[?1049h");
+    m_screen = std::make_unique<ftxui::ScreenInteractive>(ftxui::ScreenInteractive::FullscreenPrimaryScreen());
 }
 
 void FTXUIContext::shutdown_screen() {
     m_screen.reset();
+    printf("\033[?1049l");
 }
 
 void FTXUIContext::set_mode_name(const std::string& mode_name) {
@@ -261,6 +263,41 @@ StepResult FTXUIContext::show_confirmation(const std::string& prompt) {
     return outcome;
 }
 
-void FTXUIContext::show_warning(const std::string &title, const std::string &message) {
-    
+void FTXUIContext::show_warning(const std::string& title, const std::string& message) {
+    using namespace ftxui;
+
+    auto btn_ok = Button("OK", [&] { m_screen->Exit(); });
+    auto buttons = Container::Horizontal({btn_ok});
+
+    Elements msg_lines;
+    std::istringstream stream(message);
+    std::string line;
+    while (std::getline(stream, line)) {
+        msg_lines.push_back(paragraphAlignCenter(line));
+    }
+    if (msg_lines.empty()) {
+        msg_lines.push_back(text("") | center);
+    }
+
+    auto content = vbox({
+        text("WARNING") | bold | color(Color::Yellow) | center,
+        separatorEmpty(),
+        vbox(std::move(msg_lines)) | center,
+        separatorEmpty(),
+        text("Press OK to continue.") | dim | center
+    }) | center;
+
+    auto component = Renderer(buttons, [&] {
+        return build_layout(title, content, buttons);
+    });
+
+    component |= CatchEvent([&](Event event) {
+        if (event == Event::Escape) {
+            m_screen->Exit();
+            return true;
+        }
+        return false;
+    });
+
+    m_screen->Loop(component);
 }
