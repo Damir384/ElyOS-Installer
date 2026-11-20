@@ -8,7 +8,7 @@ void print_welcome_message() {
         "------------------------------------------------------------------\n"
         " ElyOS Installer [Arch Linux powered] _\n"
         " Autonomy is not isolation, but independence. _\n"
-        " Probing hardware... Automate what you want, control what you need.\n"
+        " Automate what you want, control what you need.\n"
         "------------------------------------------------------------------",
         /*log_to_file=*/ false
     );
