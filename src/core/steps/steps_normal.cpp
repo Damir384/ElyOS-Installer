@@ -30,7 +30,7 @@
         StepResult res = ctx.ui->show_menu("disk selection", values, choice);
 
         if (res == StepResult::NEXT) {
-            ctx.target_disk = disks[keys[choice]];
+            ctx.target_disk = keys[choice];
             Logger::instance().log(LogLevel::INFO, "Target disk selected by user: " + ctx.target_disk);
         }
 
