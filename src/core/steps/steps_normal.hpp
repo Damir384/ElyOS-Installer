@@ -5,5 +5,7 @@ namespace core::steps {
 
     StepResult disk_select_step(InstallContext& ctx);
     
+    StepResult select_partitioning_scheme(InstallContext& ctx);
+
     StepResult test_normal_step(InstallContext& ctx);
 }
