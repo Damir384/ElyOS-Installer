@@ -18,6 +18,10 @@ int check_file_exist(const std::string& path, std::string& message) {
 }
 
 int check_file_readable(const std::string& path, std::string& message) {
+    int ec = check_file_exist(path, message);
+    if (ec!=0) {
+        return ec;
+    }
     if (access(path.c_str(), R_OK) != 0) {
         message = "File is not readable (" + std::string(std::strerror(errno)) + "): " + path;
         return -1;

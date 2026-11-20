@@ -11,7 +11,7 @@ namespace utils {
     int check_file_exist(const std::string& path, std::string& message);
 
     /**
-     * @brief Verifies read permissions for a given file path using access(R_OK).
+     * @brief Checks if a file physically exists on the filesystem and verifies read permissions for a given file path using access(R_OK).
      * @param [in] path File path to test.
      * @param [out] message Output string containing system errno details upon failure.
      * @return int Returns 0 if file is readable, -1 otherwise.
