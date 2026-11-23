@@ -3,26 +3,8 @@
 #include "utils/fs_utils.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
-#include <iostream>
 
-void traverse(const nlohmann::json& j) {
-    if (j.is_object()) {
-        for (const auto& [key, val] : j.items()) {
-            std::cout << "Ключ: " << key << '\n';
-            traverse(val);
-        }
-    } else if (j.is_array()) {
-        for (const auto& item : j) {
-            traverse(item);
-        }
-    } else {
-        // Базовый случай: достигнуто примитивное значение (строка, число, bool)
-        std::cout << "Значение: " << j << '\n';
-    }
-}
-
-
-    namespace core::steps {
+namespace core::steps {
     std::vector<Step> get_normal_installation_steps() {
         using namespace core::steps;
         return {
@@ -65,19 +47,62 @@ void traverse(const nlohmann::json& j) {
 
         std::string err_msg;
         int err = -1;
+        nlohmann::json list;
 
         if(utils::check_file_readable(ctx.partition_profiles_path, err_msg)==0) {
-            auto list = nlohmann::json::parse(utils::read_file(ctx.partition_profiles_path));
-            traverse(list);
-            err = 0;
+            try {
+                list = nlohmann::json::parse(utils::read_file(ctx.partition_profiles_path));
+                list = list.at("disk_layouts");
+                err = 0;
+            }
+            catch(std::exception& e) {
+                err_msg = e.what();
+            }
         }
         
         if (err) {
-            Logger::instance().log(LogLevel::WARNING, "Cannot open the partition profiles. Using the emergency list."+err_msg);
+            Logger::instance().log(LogLevel::WARNING, "Cannot open the partition profiles. Using the emergency list. Error message: "+err_msg);
             ctx.ui->show_warning("Partitions not found", "Cannot open the partition profiles.\nUsing the emergency list.\n"+err_msg);
+
+                list = nlohmann::json::array({
+    nlohmann::json::parse(R"({
+        "description": "512 MB EFI boot partition and root partition.",
+        "partition_table": "gpt",
+        "partitions": [
+            {
+                "flags": ["boot", "esp"],
+                "fs": "fat32",
+                "mount_point": "/boot",
+                "name": "EFI System",
+                "size": "512M"
+            },
+            {
+                "flags": [],
+                "fs": "ext4",
+                "mount_point": "/",
+                "name": "Root",
+                "size": "auto"
+            }
+        ],
+        "profile": "linux_uefi"
+    })")});
+        }
+        
+        std::vector<std::string> disk_layouts;
+        for(const auto& layout : list) {
+            disk_layouts.push_back(layout.at("profile").get<std::string>() + " " + layout.at("description").get<std::string>());
         }
 
-        return StepResult::NEXT;
+        int selected = 0;
+
+        auto res = ctx.ui->show_menu("Select partitioning scheme", disk_layouts, selected);
+
+        if (res==StepResult::NEXT) {
+            Logger::instance().log(LogLevel::INFO, "User select: " + list.at(selected).at("profile").get<std::string>());
+            Logger::instance().log(LogLevel::DEBUG, "Profile layout parameters: "+list.at(selected).dump());
+        }
+
+        return res;
     }
 
     StepResult test_normal_step(InstallContext& ctx) {

@@ -1,0 +1,39 @@
+{
+  "disk_layouts": [
+    {
+      "profile": "linux_uefi",
+      "description": "512 MB EFI boot partition and root partition.",
+      "partition_table": "gpt",
+      "partitions": [
+        {
+          "name": "EFI System",
+          "mount_point": "/boot",
+          "fs": "fat32",
+          "size": "512M",
+          "flags": ["boot", "esp"]
+        },
+        {
+          "name": "Root",
+          "mount_point": "/",
+          "fs": "ext4",
+          "size": "auto",
+          "flags": []
+        }
+      ]
+    },
+    {
+      "profile": "linux_legacy",
+      "description": "Single root partition using the whole disk.",
+      "partition_table": "mbr",
+      "partitions": [
+        {
+          "name": "Root",
+          "mount_point": "/",
+          "fs": "ext4",
+          "size": "auto",
+          "flags": []
+        }
+      ]
+    }
+  ]
+}
