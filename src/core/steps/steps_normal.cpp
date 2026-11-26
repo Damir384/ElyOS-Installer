@@ -3,6 +3,59 @@
 #include "utils/fs_utils.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
+#include <stdexcept>
+
+namespace {
+    static void validate_disk_layouts(const nlohmann::json& layouts)
+    {
+        using json = nlohmann::json;
+
+        if (!layouts.is_array())
+            throw std::runtime_error("disk_layouts: expected array");
+
+        for (std::size_t i = 0; i < layouts.size(); ++i) {
+            const auto& layout = layouts[i];
+            const std::string path = "disk_layouts[" + std::to_string(i) + "]";
+
+            if (!layout.is_object())
+                throw std::runtime_error(path + ": expected object");
+
+            for (const char* key : {"description", "partition_table", "profile"}) {
+                if (!layout.contains(key) || !layout.at(key).is_string())
+                    throw std::runtime_error(path + "." + key + ": missing or not a string");
+            }
+
+            if (!layout.contains("partitions") || !layout.at("partitions").is_array())
+                throw std::runtime_error(path + ".partitions: missing or not an array");
+
+            const auto& partitions = layout.at("partitions");
+            for (std::size_t j = 0; j < partitions.size(); ++j) {
+                const auto& partition = partitions[j];
+                const std::string partition_path =
+                    path + ".partitions[" + std::to_string(j) + "]";
+
+                if (!partition.is_object())
+                    throw std::runtime_error(partition_path + ": expected object");
+
+                for (const char* key : {"fs", "mount_point", "name", "size"}) {
+                    if (!partition.contains(key) || !partition.at(key).is_string())
+                        throw std::runtime_error(
+                            partition_path + "." + key + ": missing or not a string");
+                }
+
+                if (!partition.contains("flags") || !partition.at("flags").is_array())
+                    throw std::runtime_error(partition_path + ".flags: missing or not an array");
+
+                for (std::size_t k = 0; k < partition.at("flags").size(); ++k) {
+                    if (!partition.at("flags")[k].is_string())
+                        throw std::runtime_error(
+                            partition_path + ".flags[" + std::to_string(k) +
+                            "]: expected string");
+                }
+            }
+        }
+    }
+}
 
 namespace core::steps {
     std::vector<Step> get_normal_installation_steps() {
@@ -53,6 +106,7 @@ namespace core::steps {
             try {
                 list = nlohmann::json::parse(utils::read_file(ctx.partition_profiles_path));
                 list = list.at("disk_layouts");
+                validate_disk_layouts(list);
                 err = 0;
             }
             catch(std::exception& e) {
@@ -63,29 +117,28 @@ namespace core::steps {
         if (err) {
             Logger::instance().log(LogLevel::WARNING, "Cannot open the partition profiles. Using the emergency list. Error message: "+err_msg);
             ctx.ui->show_warning("Partitions not found", "Cannot open the partition profiles.\nUsing the emergency list.\n"+err_msg);
-
-                list = nlohmann::json::array({
-    nlohmann::json::parse(R"({
-        "description": "512 MB EFI boot partition and root partition.",
-        "partition_table": "gpt",
-        "partitions": [
-            {
-                "flags": ["boot", "esp"],
-                "fs": "fat32",
-                "mount_point": "/boot",
-                "name": "EFI System",
-                "size": "512M"
-            },
-            {
-                "flags": [],
-                "fs": "ext4",
-                "mount_point": "/",
-                "name": "Root",
-                "size": "auto"
-            }
-        ],
-        "profile": "linux_uefi"
-    })")});
+            list = nlohmann::json::array({
+            nlohmann::json::parse(R"({
+                "description": "512 MB EFI boot partition and root partition.",
+                "partition_table": "gpt",
+                "partitions": [
+                    {
+                        "flags": ["boot", "esp"],
+                        "fs": "fat32",
+                        "mount_point": "/boot",
+                        "name": "EFI System",
+                        "size": "512M"
+                    },
+                    {
+                        "flags": [],
+                        "fs": "ext4",
+                        "mount_point": "/",
+                        "name": "Root",
+                        "size": "auto"
+                    }
+                ],
+                "profile": "linux_uefi"
+            })")});
         }
         
         std::vector<std::string> disk_layouts;
@@ -102,10 +155,13 @@ namespace core::steps {
             Logger::instance().log(LogLevel::DEBUG, "Profile layout parameters: "+list.at(selected).dump());
         }
 
+        // TODO: записать всё в partition plan но без реальных разделов.
+
         return res;
     }
 
     StepResult test_normal_step(InstallContext& ctx) {
         return StepResult::NEXT;
     }
+
 }
